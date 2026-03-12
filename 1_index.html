@@ -1,0 +1,1713 @@
+<!doctype html>
+<html lang="zh-CN">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="APEX">
+  <meta name="theme-color" content="#060608">
+  <title>APEX · RPG 成长系统</title>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap');
+
+:root {
+  --bg:#060608;--bg2:#0C0C12;--bg3:#111118;
+  --border:#1C1C28;--border2:#252535;
+  --text:#E2DDD4;--dim:#4A4A62;--dim2:#6A6A85;
+  --gold:#C8922A;--gold2:#E5B84A;
+  --green:#3A9E6A;--red:#C84040;--blue:#3A7FC8;--purple:#7A4AC8;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
+}
+
+/* 浅色主题 */
+body.light {
+  --bg:#F5F5F7;--bg2:#FFFFFF;--bg3:#EEEEF2;
+  --border:#D0D0DA;--border2:#B8B8C8;
+  --text:#1A1A24;--dim:#6A6A85;--dim2:#8A8AA0;
+  --gold:#B07A1A;--gold2:#C8922A;
+  --green:#2A7A4A;--red:#A03030;--blue:#2A5A9A;--purple:#5A2A9A;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;}
+body{display:flex;flex-direction:column;}
+
+/* NAV */
+.nav{display:flex;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;padding-top:var(--safe-top);}
+.nav::-webkit-scrollbar{display:none;}
+.nb{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim2);padding:12px 6px;cursor:pointer;font-size:9px;letter-spacing:.1em;font-family:'Rajdhani',sans-serif;font-weight:700;white-space:nowrap;transition:all .2s;min-width:48px;}
+.nb.active{color:var(--gold2);border-bottom-color:var(--gold);}
+
+/* PAGES */
+.pages{flex:1;overflow:hidden;position:relative;}
+.page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;flex-direction:column;}
+.page.active{display:flex;}
+.inner{max-width:600px;margin:0 auto;padding:10px 14px calc(20px + var(--safe-bot));width:100%;}
+.page-title{font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:.18em;color:var(--dim);margin-bottom:12px;}
+
+/* SCORE HEADER */
+.score-hd{background:linear-gradient(180deg,#0A0A14,var(--bg));border-bottom:1px solid var(--border);padding:10px 14px;flex-shrink:0;}
+.hd-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.hd-label{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.2em;color:var(--dim);}
+.date-s{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--dim2);}
+.sc-row{display:flex;align-items:center;gap:10px;}
+.sc-big{font-family:'Rajdhani',sans-serif;font-size:40px;font-weight:700;color:var(--gold2);line-height:1;text-shadow:0 0 24px rgba(229,184,74,.35);min-width:80px;}
+.sc-meta{display:flex;flex-direction:column;gap:3px;}
+.sc-vs{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;}
+.sc-vs.up{color:var(--green);}.sc-vs.dn{color:var(--red);}.sc-vs.eq{color:var(--dim2);}
+.yd-row{display:flex;align-items:center;gap:5px;}
+.yd-lbl{font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--dim);}
+.yd-in{width:56px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;color:var(--dim2);font-family:'Rajdhani',sans-serif;font-size:14px;text-align:center;padding:2px 4px;outline:none;}
+.prog-t{flex:1;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.prog-f{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .4s;box-shadow:0 0 8px rgba(200,146,42,.5);}
+
+/* STATUS EFFECT STRIP */
+.status-strip{display:flex;gap:6px;padding:6px 14px;flex-shrink:0;overflow-x:auto;background:var(--bg);}
+.status-strip:empty{display:none;}
+.status-strip::-webkit-scrollbar{display:none;}
+.sfx{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;font-size:10px;white-space:nowrap;border:1px solid;}
+.sfx.buff{color:#58C888;border-color:rgba(58,200,136,.25);background:rgba(58,200,136,.06);}
+.sfx.debuff{color:#E07070;border-color:rgba(224,112,112,.25);background:rgba(224,112,112,.06);}
+.sfx.neutral{color:var(--dim2);border-color:var(--border);background:var(--bg3);}
+
+/* SAVE BTN */
+.save-btn{display:block;width:calc(100% - 28px);margin:8px auto 0;background:var(--gold);border:none;border-radius:3px;color:var(--bg);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.12em;padding:10px;cursor:pointer;flex-shrink:0;}
+.save-btn:active{background:var(--gold2);}
+
+/* SECTIONS */
+.sec{margin-bottom:8px;border:1px solid var(--border);border-radius:4px;overflow:hidden;background:var(--bg2);}
+.sec-hd{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg3);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.sec-l{display:flex;align-items:center;gap:8px;}
+.sdot{width:6px;height:6px;border-radius:1px;transform:rotate(45deg);flex-shrink:0;}
+.sn{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:.07em;}
+.st{font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--dim);margin-top:1px;}
+.sec-r{display:flex;align-items:center;gap:7px;}
+.ssub{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--gold);}
+.arr{font-size:10px;color:var(--dim);transition:transform .2s;}
+.arr.cl{transform:rotate(-90deg);}
+.sec-bd{padding:3px 0;}.sec-bd.hid{display:none;}
+
+/* ITEMS */
+.item{display:flex;align-items:center;padding:8px 12px;gap:8px;cursor:pointer;transition:background .12s;}
+.item:active{background:rgba(255,255,255,.02);}
+.item.on{background:rgba(200,146,42,.04);}
+.chk{width:18px;height:18px;border:1px solid var(--border2);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--bg);}
+.item.on .chk{background:var(--gold);border-color:var(--gold);}
+.ci{display:none;color:var(--bg);font-size:11px;font-weight:700;}
+.item.on .ci{display:block;}
+.ilbl{flex:1;font-size:13px;color:#7A7A98;line-height:1.3;transition:color .15s;}
+.item.on .ilbl{color:var(--text);}
+.ipts{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;min-width:36px;text-align:right;color:var(--dim);}
+.item.on .ipts{color:var(--green);}
+.calc-row{display:flex;align-items:center;padding:7px 12px;gap:7px;}
+.cl{flex:1;font-size:13px;color:#7A7A98;}
+.ci2{width:46px;background:var(--bg3);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:13px;text-align:center;padding:3px 4px;outline:none;}
+.ci2:focus{border-color:var(--gold);}
+.cr{font-size:11px;color:var(--dim2);font-family:'Rajdhani',sans-serif;white-space:nowrap;}
+.cres{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;color:var(--green);min-width:34px;text-align:right;}
+.ded-row{display:flex;align-items:center;padding:8px 12px;gap:8px;}
+.dl{flex:1;font-size:13px;color:#7A7A98;}
+.di{width:46px;background:var(--bg3);border:1px solid rgba(200,64,64,.3);border-radius:2px;color:var(--red);font-family:'Rajdhani',sans-serif;font-size:13px;text-align:center;padding:3px 4px;outline:none;}
+.dv{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;color:var(--red);min-width:36px;text-align:right;}
+
+/* REWARD / CONFIRM / NOTE */
+.rew-sec{border:1px solid rgba(200,146,42,.2);border-radius:4px;background:rgba(200,146,42,.03);margin-bottom:8px;}
+.rew-hd{padding:9px 12px;background:rgba(200,146,42,.06);border-bottom:1px solid rgba(200,146,42,.15);}
+.rew-t{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--gold2);}
+.rew-bd{padding:4px 12px;}
+.ri{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);}
+.ri:last-child{border:none;}
+.rc{width:18px;height:18px;border:1px solid rgba(200,146,42,.35);border-radius:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.rc.on{background:var(--gold);border-color:var(--gold);}
+.rc.on::after{content:'✓';font-size:10px;color:var(--bg);font-weight:700;}
+.rl{font-size:13px;color:#9A9AB8;}
+.rc.on~.rl{color:var(--gold2);}
+.conf-sec{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:8px;}
+.conf-t{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.12em;color:var(--dim);margin-bottom:8px;}
+.conf-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.cpill{display:flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--dim2);transition:all .15s;}
+.cpill.on{border-color:rgba(58,158,106,.4);color:var(--green);background:rgba(58,158,106,.06);}
+.cdot2{width:5px;height:5px;border-radius:50%;background:var(--dim);transition:background .15s;}
+.cpill.on .cdot2{background:var(--green);}
+.note-sec{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:8px;}
+.note-l{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.1em;color:var(--dim);margin-bottom:7px;}
+.note-ta{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Noto Sans SC',sans-serif;font-size:13px;padding:8px 10px;outline:none;resize:none;line-height:1.6;}
+.note-ta:focus{border-color:var(--gold);}
+
+/* ══ CHARACTER PAGE ══ */
+.char-hero{background:linear-gradient(135deg,#0A0A18,#06060E);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
+.char-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(200,146,42,.12),transparent 70%);}
+.char-level-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.char-lv-badge{background:var(--gold);color:var(--bg);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;padding:3px 9px;border-radius:2px;letter-spacing:.1em;}
+.char-class{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--text);}
+.char-title{font-size:11px;color:var(--dim2);}
+.xp-bar-wrap{margin-top:10px;}
+.xp-label-row{display:flex;justify-content:space-between;font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--dim2);margin-bottom:5px;}
+.xp-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.xp-fill{height:100%;background:linear-gradient(90deg,#7A4AC8,#C87AC8);border-radius:3px;transition:width .6s;}
+
+.char-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.cs{background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:10px 8px;text-align:center;}
+.cs-n{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--gold2);}
+.cs-l{font-size:10px;color:var(--dim2);margin-top:2px;}
+
+.status-effects-sec{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:10px;}
+.se-title{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.14em;color:var(--dim);margin-bottom:8px;}
+.se-list{display:flex;flex-direction:column;gap:6px;}
+.se-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:3px;border:1px solid;}
+.se-item.buff{border-color:rgba(58,200,136,.2);background:rgba(58,200,136,.04);}
+.se-item.debuff{border-color:rgba(224,112,112,.2);background:rgba(224,112,112,.04);}
+.se-item.neutral{border-color:var(--border);background:var(--bg3);}
+.se-icon{font-size:16px;line-height:1;flex-shrink:0;margin-top:1px;}
+.se-text{flex:1;}
+.se-name{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;}
+.se-desc{font-size:11px;color:var(--dim2);margin-top:2px;line-height:1.4;}
+.se-item.buff .se-name{color:#58C888;}
+.se-item.debuff .se-name{color:#E07070;}
+.se-item.neutral .se-name{color:var(--dim2);}
+
+/* ACHIEVEMENTS */
+.ach-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.ach{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:10px 8px;text-align:center;transition:all .2s;}
+.ach.unlocked{border-color:var(--gold);background:rgba(200,146,42,.06);}
+.ach-icon{font-size:22px;line-height:1;margin-bottom:5px;opacity:.25;filter:grayscale(1);}
+.ach.unlocked .ach-icon{opacity:1;filter:none;}
+.ach-name{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--dim);}
+.ach.unlocked .ach-name{color:var(--gold2);}
+.ach-desc{font-size:9px;color:var(--dim);margin-top:3px;line-height:1.3;}
+
+/* ══ QUEST PAGE ══ */
+.quest-header{background:linear-gradient(135deg,#080812,#060608);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:10px;}
+.quest-day-label{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.16em;color:var(--dim);margin-bottom:4px;}
+.quest-xp-pool{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;color:var(--purple);}
+.quest-xp-label{font-size:11px;color:var(--dim2);margin-top:2px;}
+.quest-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;transition:border-color .2s;cursor:pointer;}
+.quest-card.done{border-color:rgba(58,158,106,.4);background:rgba(58,158,106,.04);}
+.quest-card.failed{opacity:.4;}
+.qc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.qc-icon{font-size:20px;flex-shrink:0;}
+.qc-info{flex:1;}
+.qc-name{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--text);}
+.quest-card.done .qc-name{color:var(--green);}
+.qc-desc{font-size:12px;color:var(--dim2);margin-top:3px;line-height:1.4;}
+.qc-reward{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--purple);text-align:right;flex-shrink:0;}
+.quest-card.done .qc-reward{color:var(--green);}
+.qc-chk{width:22px;height:22px;border:1px solid var(--border2);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.quest-card.done .qc-chk{background:var(--green);border-color:var(--green);}
+.qc-chk-mark{display:none;color:white;font-size:13px;font-weight:700;}
+.quest-card.done .qc-chk-mark{display:block;}
+
+.quest-custom-sec{background:var(--bg2);border:1px solid var(--border);border-radius:4px;margin-bottom:10px;overflow:hidden;}
+.quest-custom-hd{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg3);border-bottom:1px solid var(--border);}
+.quest-custom-title{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--purple);}
+
+/* ══ HISTORY ══ */
+.hist-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.stat-c{background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:10px 12px;}
+.stat-n{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--gold2);}
+.stat-l{font-size:10px;color:var(--dim2);margin-top:2px;}
+.chart-w{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:12px;}
+.chart-lbl{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.14em;color:var(--dim);margin-bottom:10px;}
+canvas{width:100%;display:block;}
+.hist-list{display:flex;flex-direction:column;gap:6px;}
+.hi{background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:10px 12px;}
+.hi-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.hi-date{font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--dim2);}
+.hi-score{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--gold);}
+.hi-diff{font-family:'Rajdhani',sans-serif;font-size:11px;}
+.hi-diff.up{color:var(--green);}.hi-diff.dn{color:var(--red);}.hi-diff.eq{color:var(--dim2);}
+.hi-note{font-size:12px;color:var(--dim2);margin-top:5px;line-height:1.5;font-style:italic;border-top:1px solid var(--border);padding-top:5px;}
+.no-data{text-align:center;padding:40px 20px;color:var(--dim2);font-size:13px;}
+.no-data-s{font-size:11px;color:var(--dim);margin-top:6px;}
+.clr-btn{display:block;width:100%;margin-top:14px;background:none;border:1px solid rgba(200,64,64,.3);border-radius:3px;color:var(--red);font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:.1em;padding:8px;cursor:pointer;opacity:.6;}
+
+/* ══ JOURNAL ══ */
+.journal-entry{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;}
+.je-date{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--gold);margin-bottom:6px;letter-spacing:.08em;}
+.je-score{font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--dim2);margin-bottom:6px;}
+.je-text{font-size:13px;color:var(--text);line-height:1.7;}
+
+/* ══ STREAK (BOSS BATTLE) ══ */
+.boss-card{background:linear-gradient(135deg,#0E0810,#06060A);border:1px solid rgba(200,64,64,.3);border-radius:6px;padding:14px;margin-bottom:12px;position:relative;overflow:hidden;}
+.boss-card::before{content:'';position:absolute;top:-30px;left:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(200,64,64,.15),transparent 70%);}
+.boss-name{font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:.2em;color:rgba(200,64,64,.6);margin-bottom:4px;}
+.boss-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#E07070;}
+.boss-hp-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;}
+.boss-hp-label{font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--dim);}
+.boss-hp-val{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#E07070;}
+.boss-hp-bar{height:8px;background:rgba(200,64,64,.15);border-radius:4px;overflow:hidden;}
+.boss-hp-fill{height:100%;background:linear-gradient(90deg,#C84040,#E87070);border-radius:4px;transition:width .8s;}
+.boss-flavor{font-size:11px;color:var(--dim2);margin-top:10px;font-style:italic;line-height:1.5;}
+
+.combo-card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:12px;}
+.combo-row{display:flex;justify-content:space-between;align-items:center;}
+.combo-num{font-family:'Rajdhani',sans-serif;font-size:40px;font-weight:700;color:var(--gold2);line-height:1;text-shadow:0 0 20px rgba(229,184,74,.35);}
+.combo-right{text-align:right;}
+.combo-max{font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--dim2);}
+.combo-dmg{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--red);margin-top:3px;}
+.streak-prog-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:10px 0 6px;}
+.streak-prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px;transition:width .5s;}
+.milestone-row{display:flex;justify-content:space-between;font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--dim);}
+
+.streak-summary{display:flex;gap:10px;margin-bottom:12px;}
+.streak-card{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px;text-align:center;}
+.streak-num{font-family:'Rajdhani',sans-serif;font-size:36px;font-weight:700;color:var(--gold2);line-height:1.2;}
+.streak-label{font-size:10px;color:var(--dim2);letter-spacing:.1em;}
+
+.identity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px;}
+.id-card{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:12px;text-align:center;}
+.id-card.unlocked{border-color:var(--gold);background:rgba(200,146,42,.08);}
+.id-title{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;}
+.id-title input{background:transparent;border:1px dashed var(--border2);color:var(--text);font-size:13px;width:80px;text-align:center;padding:2px;border-radius:2px;}
+.id-title button{background:none;border:none;color:var(--dim2);cursor:pointer;font-size:11px;}
+.id-days{font-size:11px;color:var(--dim);margin-bottom:8px;}
+.id-check{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;color:var(--dim2);}
+.id-check input{accent-color:var(--gold);width:16px;height:16px;}
+
+.threshold-row{margin-bottom:12px;display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px 12px;}
+.threshold-row span{font-size:12px;color:var(--dim2);}
+.threshold-row input{background:var(--bg3);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;padding:5px 8px;width:72px;outline:none;}
+
+/* ══ PLAYER CARD ══ */
+.player-card{background:linear-gradient(135deg,#080E14,#060A0E);border:1px solid rgba(58,127,200,.3);border-radius:6px;padding:14px;margin-bottom:12px;position:relative;overflow:hidden;}
+.player-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(58,127,200,.15),transparent 70%);}
+.player-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.player-tag{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.2em;color:rgba(58,127,200,.6);margin-bottom:3px;}
+.player-name{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#70A8E8;}
+.player-hp-val{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#70A8E8;line-height:1;}
+.player-hp-bar{height:8px;background:rgba(58,127,200,.15);border-radius:4px;overflow:hidden;}
+.player-hp-fill{height:100%;background:linear-gradient(90deg,#3A7FC8,#70A8E8);border-radius:4px;transition:width .8s;}
+/* ══ SETTING BLOCK ══ */
+.setting-block{background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.setting-block-title{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.14em;color:var(--dim);padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--border);gap:10px;}
+.setting-row:last-child{border:none;}
+.setting-row>span{font-size:12px;color:var(--dim2);white-space:nowrap;}
+.set-in{background:var(--bg3);border:1px solid var(--border);border-radius:2px;color:var(--text);font-family:'Noto Sans SC',sans-serif;font-size:13px;padding:5px 8px;outline:none;text-align:right;}
+.set-in:focus{border-color:var(--gold);}
+.set-in.num{width:90px;font-family:'Rajdhani',sans-serif;font-size:14px;}
+.dmg-block{background:var(--bg2);border:1px solid rgba(200,64,64,.2);border-radius:4px;padding:12px;margin-bottom:12px;}
+
+/* ══ CUSTOMIZE ══ */
+.cust-sec{background:var(--bg2);border:1px solid var(--border);border-radius:4px;margin-bottom:10px;overflow:hidden;}
+.cust-hd{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg3);border-bottom:1px solid var(--border);}
+.cust-hn{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;}
+.hd-actions{display:flex;gap:5px;}
+.add-btn,.edit-btn,.del-section-btn{background:none;border:1px solid var(--border2);border-radius:2px;font-family:'Rajdhani',sans-serif;font-size:10px;padding:3px 8px;cursor:pointer;letter-spacing:.06em;line-height:1.2;}
+.add-btn{color:var(--gold);}
+.edit-btn{color:var(--dim2);}
+.edit-btn:hover{color:var(--gold);border-color:var(--gold);}
+.del-section-btn{color:var(--red);border-color:rgba(200,64,64,.3);}
+.cust-item{display:flex;align-items:center;padding:8px 12px;gap:8px;border-bottom:1px solid var(--border);}
+.cust-item:last-child{border:none;}
+.cust-name{flex:1;font-size:13px;color:var(--text);}
+.cust-pts-badge{font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--green);background:rgba(58,158,106,.1);border:1px solid rgba(58,158,106,.2);border-radius:3px;padding:2px 7px;}
+.cust-edit{background:none;border:none;color:var(--dim2);font-size:13px;cursor:pointer;padding:3px;}
+.cust-del{background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:3px;opacity:.5;}
+.cust-del:hover{opacity:1;}
+.new-section-btn{display:block;width:100%;background:var(--bg3);border:2px dashed var(--border2);border-radius:4px;color:var(--gold2);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:.12em;padding:13px;margin-bottom:12px;cursor:pointer;transition:all .2s;text-align:center;}
+.new-section-btn:hover{background:var(--bg2);border-color:var(--gold);}
+
+/* ══ MODAL ══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:800;display:none;align-items:flex-end;justify-content:center;}
+.overlay.show{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:8px 8px 0 0;padding:18px 16px calc(18px + var(--safe-bot));width:100%;max-width:600px;max-height:90vh;overflow-y:auto;}
+.modal-t{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;letter-spacing:.1em;color:var(--gold2);margin-bottom:14px;}
+.modal-row{margin-bottom:12px;}
+.modal-lbl{font-size:11px;color:var(--dim2);margin-bottom:5px;font-family:'Rajdhani',sans-serif;letter-spacing:.08em;}
+.modal-in{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Noto Sans SC',sans-serif;font-size:14px;padding:9px 11px;outline:none;}
+.modal-in:focus{border-color:var(--gold);}
+.modal-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.modal-btns{display:flex;gap:8px;}
+.mbtn{flex:1;padding:10px;border:none;border-radius:3px;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;cursor:pointer;}
+.mbtn.cancel{background:var(--bg3);color:var(--dim2);border:1px solid var(--border);}
+.mbtn.ok{background:var(--gold);color:var(--bg);}
+.color-dots{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.cdot-sel{width:24px;height:24px;border-radius:4px;cursor:pointer;border:2px solid transparent;transform:rotate(45deg);transition:border .1s;}
+.cdot-sel.chosen{border-color:white;}
+
+/* CELEBRATION */
+.celeb{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:var(--bg2);border:1px solid var(--gold);border-radius:6px;padding:14px 26px;text-align:center;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 40px rgba(200,146,42,.3);pointer-events:none;}
+.celeb.show{transform:translate(-50%,-50%) scale(1);}
+.celeb-p{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;color:var(--gold2);}
+.celeb-t{font-size:10px;color:var(--dim2);margin-top:2px;letter-spacing:.08em;}
+
+/* ══ COLLAPSE ══ */
+.collapse-sec{background:var(--bg2);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.collapse-hd{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;cursor:pointer;user-select:none;background:var(--bg3);}
+.collapse-hd:active{background:var(--bg2);}
+.collapse-title{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--dim2);}
+.collapse-arr{font-size:11px;color:var(--dim);transition:transform .2s;}
+.collapse-arr.open{transform:rotate(-180deg);}
+.collapse-bd{border-top:1px solid var(--border);}
+.collapse-bd.hid{display:none;}
+
+.sdiv{height:1px;background:var(--border);margin:3px 12px;}
+</style>
+ </head>
+ <body>
+  <nav class="nav">
+   <button class="nb active" onclick="showPage('streak',this)">🔥 STREAK</button>
+   <button class="nb" onclick="showPage('char',this)">α CHARACTER</button>
+   <button class="nb" onclick="showPage('today',this)">TODAY</button>
+   <button class="nb" onclick="showPage('history',this)">HISTORY</button>
+  </nav>
+  <div class="pages">
+   <!-- ══════ CHARACTER ══════ -->
+   <div class="page" id="page-char">
+	<div class="inner">
+	 <div class="page-title">CHARACTER · 角色成长</div>
+	 <div class="char-hero">
+	  <div class="char-level-row">
+	   <div class="char-lv-badge" id="charLvBadge">LV 1</div>
+	   <div>
+		<div class="char-class" id="charClass">觉醒者</div>
+		<div class="char-title" id="charClassSub">职业：未定</div>
+	   </div>
+	  </div>
+	  <div class="xp-bar-wrap">
+	   <div class="xp-label-row">
+		<span>EXPERIENCE</span> <span id="xpText">0 / 100 XP</span>
+	   </div>
+	   <div class="xp-bar">
+		<div class="xp-fill" id="xpFill" style="width:0%"></div>
+	   </div>
+	  </div>
+	 </div>
+	 <div class="char-stats">
+	  <div class="cs">
+	   <div class="cs-n" id="charTotalXP">0</div>
+	   <div class="cs-l">累计 XP</div>
+	  </div>
+	  <div class="cs">
+	   <div class="cs-n" id="charDays">0</div>
+	   <div class="cs-l">作战天数</div>
+	  </div>
+	  <div class="cs">
+	   <div class="cs-n" id="charQuestXP">0</div>
+	   <div class="cs-l">当前连胜</div>
+	  </div>
+	 </div>
+	 <div class="status-effects-sec">
+	  <div class="se-title">ACTIVE EFFECTS · 当前状态效果</div>
+	  <div class="se-list" id="seList">
+	   <div style="font-size:12px;color:var(--dim2);">先保存一天记录后状态效果会出现在这里</div>
+	  </div>
+	 </div>
+	 <div class="page-title" style="margin-top:4px;">ACHIEVEMENTS · 成就</div>
+	 <div class="ach-grid" id="achGrid"></div>
+	</div>
+   </div>
+   <!-- ══════ TODAY ══════ -->
+   <div class="page" id="page-today">
+	<div class="score-hd">
+	 <div class="hd-row">
+	  <div class="hd-label">APEX · DAILY SCORE</div>
+	  <div class="date-s" id="dateStr"></div>
+	 </div>
+	 <div class="sc-row">
+	  <div class="sc-big" id="totalScore">0</div>
+	  <div class="sc-meta">
+	   <div class="sc-vs eq" id="scoreDiff">vs 昨日 —</div>
+	   <div class="yd-row">
+		<div class="yd-lbl">昨日</div>
+		<input class="yd-in" type="number" id="ydInput" placeholder="0" oninput="updateDiff()">
+	   </div>
+	  </div>
+	  <div class="prog-t" style="flex:1">
+	   <div class="prog-f" id="progFill" style="width:0%"></div>
+	  </div>
+	 </div>
+	</div>
+	<div class="status-strip" id="statusStrip"></div>
+	<button class="save-btn" onclick="saveToday()">保存今日记录</button>
+	<div class="inner" id="todayInner"></div>
+   </div>
+   <!-- ══════ HISTORY ══════ -->
+   <div class="page" id="page-history">
+	<div class="inner">
+	 <div class="page-title">PROGRESS CURVE · 进步曲线</div>
+	 <div class="hist-stats">
+	  <div class="stat-c">
+	   <div class="stat-n" id="statDays">0</div>
+	   <div class="stat-l">累计天数</div>
+	  </div>
+	  <div class="stat-c">
+	   <div class="stat-n" id="statBest">0</div>
+	   <div class="stat-l">最高分</div>
+	  </div>
+	  <div class="stat-c">
+	   <div class="stat-n" id="statAvg">0</div>
+	   <div class="stat-l">平均分</div>
+	  </div>
+	 </div>
+	 <div class="chart-w">
+	  <div class="chart-lbl">每日积分走势</div>
+	  <canvas id="scoreChart" height="150"></canvas>
+	 </div>
+	 <div class="hist-list" id="histList"></div>
+	 <button class="clr-btn" onclick="clearHistory()">清除所有历史记录</button>
+	</div>
+   </div>
+   <!-- ══════ STREAK / BOSS BATTLE ══════ -->
+   <div class="page active" id="page-streak">
+	<div class="inner">
+	 <div class="page-title">BATTLE · 连胜 × Boss × 玩家</div>
+	 <!-- PLAYER HP -->
+	 <div class="player-card">
+	  <div class="player-top">
+	   <div>
+		<div class="player-tag">PLAYER</div>
+		<div class="player-name" id="playerName">旅行者</div>
+	   </div>
+	   <div style="text-align:right;">
+		<div class="player-hp-val">
+		 <span id="playerHpCur">—</span> <span id="playerHpUnit" style="font-size:14px;color:rgba(112,168,232,.6);">天</span>
+		</div>
+		<div style="font-size:10px;color:var(--dim2);margin-top:2px;">
+		 / <span id="playerHpMax">—</span> 满血
+		</div>
+	   </div>
+	  </div>
+	  <div class="player-hp-bar">
+	   <div class="player-hp-fill" id="playerHpFill" style="width:100%"></div>
+	  </div>
+	  <div style="font-size:11px;color:var(--dim2);margin-top:8px;" id="playerFlavor">设置开始日期后，玩家 HP 将每天自动递减。</div>
+	 </div>
+	 <!-- BOSS CARD -->
+	 <div class="boss-card">
+	  <div class="boss-name">FINAL BOSS</div>
+	  <div class="boss-title" id="bossDisplayName">高考</div>
+	  <div class="boss-hp-row">
+	   <div class="boss-hp-label">BOSS HP</div>
+	   <div class="boss-hp-val">
+		<span id="bossHpCur">—</span> <span id="bossHpUnitDisp" style="font-size:13px;font-weight:400;color:rgba(224,112,112,.7);">题</span>
+	   </div>
+	  </div>
+	  <div class="boss-hp-bar">
+	   <div class="boss-hp-fill" id="bossHpFill" style="width:100%"></div>
+	  </div>
+	  <div style="font-size:11px;color:var(--dim2);margin-top:10px;" id="bossFlavor">设置 Boss 后开始造成伤害。</div>
+	 </div>
+	 <!-- DAMAGE INPUT -->
+	 <div class="dmg-block">
+	  <div class="setting-block-title" style="padding:0;font-size:10px;letter-spacing:.14em;color:var(--dim);margin-bottom:8px;">⚔ 今日造成伤害</div>
+	  <div style="display:flex;gap:8px;align-items:center;">
+	   <input type="number" id="dmgInput" class="set-in num" placeholder="0" min="0" style="flex:1;text-align:left;"> <span id="dmgUnitLabel" style="font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--dim2);">题</span>
+	   <button onclick="dealDamage()" style="background:var(--red);border:none;border-radius:3px;color:white;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;padding:9px 16px;cursor:pointer;letter-spacing:.08em;">ATTACK</button>
+	   <button onclick="healBoss()" style="background:var(--bg3);border:1px solid var(--border);border-radius:3px;color:var(--dim2);font-family:'Rajdhani',sans-serif;font-size:12px;padding:9px 12px;cursor:pointer;">撤销</button>
+	  </div>
+	  <div style="font-size:11px;color:var(--dim2);margin-top:6px;">
+	   今日累计伤害：<span id="todayDmg" style="color:var(--red);font-family:'Rajdhani',sans-serif;">0</span> <span id="todayDmgUnit"></span>
+	  </div>
+	 </div>
+	 <!-- COMBO -->
+	 <div class="combo-card">
+	  <div class="combo-row">
+	   <div>
+		<div style="font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:.14em;color:var(--dim);margin-bottom:4px;">CURRENT COMBO</div>
+		<div class="combo-num" id="currentStreak">0</div>
+		<div style="font-size:10px;color:var(--dim2);margin-top:4px;">连胜天数</div>
+	   </div>
+	   <div class="combo-right">
+		<div class="combo-max">
+		 历史最高 <span id="maxStreak" style="color:var(--gold2);">0</span>
+		</div>
+	   </div>
+	  </div>
+	  <div class="streak-prog-bar">
+	   <div class="streak-prog-fill" id="streakProgFill" style="width:0%"></div>
+	  </div>
+	  <div class="milestone-row">
+	   <span>3 入门</span><span>7 平台</span><span>21 熟练</span><span>66 大师</span>
+	  </div>
+	 </div>
+	 <div class="threshold-row">
+	  <span>达标分数 ≥</span> <input type="number" id="streakThreshold" min="1" step="1" value="80" onchange="renderStreak()"> <span style="margin-left:auto;font-size:11px;color:var(--dim2);">进步也计连胜</span>
+	 </div>
+	 <div class="identity-grid" id="identityCards"></div>
+	 <!-- COLLAPSIBLE: BOSS SETTINGS -->
+	 <div class="collapse-sec" style="margin-top:16px;">
+	  <div class="collapse-hd" onclick="toggleCollapse('bossSettings')">
+	   <span class="collapse-title">⚙ Boss 设置</span> <span class="collapse-arr" id="arr-bossSettings">▾</span>
+	  </div>
+	  <div class="collapse-bd hid" id="bd-bossSettings">
+	   <div class="setting-row">
+		<span>Boss 名称</span> <input type="text" id="bossNameInput" class="set-in" placeholder="高考" oninput="saveBossSettings()">
+	   </div>
+	   <div class="setting-row">
+		<span>总血量</span> <input type="number" id="bossTotalHp" class="set-in num" placeholder="5000" min="1" oninput="saveBossSettings()">
+	   </div>
+	   <div class="setting-row">
+		<span>当前剩余HP</span> <input type="number" id="bossCurrentHp" class="set-in num" placeholder="5000" min="0" oninput="saveBossSettings()">
+	   </div>
+	   <div class="setting-row">
+		<span>单位</span> <input type="text" id="bossUnit" class="set-in" placeholder="题" maxlength="6" oninput="saveBossSettings()">
+	   </div>
+	  </div>
+	 </div>
+	 <!-- COLLAPSIBLE: PLAYER SETTINGS -->
+	 <div class="collapse-sec" style="margin-top:8px;margin-bottom:20px;">
+	  <div class="collapse-hd" onclick="toggleCollapse('playerSettings')">
+	   <span class="collapse-title">⚙ 玩家设置</span> <span class="collapse-arr" id="arr-playerSettings">▾</span>
+	  </div>
+	  <div class="collapse-bd hid" id="bd-playerSettings">
+	   <div class="setting-row">
+		<span>名称</span> <input type="text" id="playerNameInput" class="set-in" placeholder="旅行者" oninput="savePlayerSettings()">
+	   </div>
+	   <div class="setting-row">
+		<span>最大HP（天）</span> <input type="number" id="playerMaxHp" class="set-in num" placeholder="365" min="1" oninput="savePlayerSettings()">
+	   </div>
+	   <div class="setting-row">
+		<span>开始日期</span> <input type="date" id="playerStartDate" class="set-in" style="width:auto;" onchange="savePlayerSettings()">
+	   </div>
+	  </div>
+	 </div>
+	</div>
+   </div>
+  </div>
+  <!-- /pages -->
+  <!-- 事项 Modal (支持三种类型) -->
+  <div class="overlay" id="overlay">
+   <div class="modal">
+	<div class="modal-t" id="modalTitle">添加事项</div>
+	<div class="modal-row">
+	 <div class="modal-lbl">事项名称</div>
+	 <input class="modal-in" type="text" id="modalName" placeholder="例：完成数学作业">
+	</div>
+	<div class="modal-row">
+	 <div class="modal-lbl">类型</div>
+	 <select class="modal-in" id="modalType" onchange="toggleModalFields()"> <option value="check">✓ 一次完成（固定分）</option> <option value="calc">🔢 数量累计（分值×数量）</option> <option value="counter">🔁 可多次点击（固定分/次）</option> </select>
+	</div>
+	<!-- 固定分字段（默认显示） -->
+	<div class="modal-row" id="modalPtsRow">
+	 <div class="modal-lbl">分值</div>
+	 <input class="modal-in" type="number" id="modalPts" placeholder="3" min="0.5" step="0.5">
+	</div>
+	<!-- 计算类型字段（初始隐藏） -->
+	<div class="modal-row" id="modalCalcFields" style="display:none;">
+	 <div style="display:flex; gap:8px;">
+	  <div style="flex:2;">
+	   <div class="modal-lbl">分值/单位</div>
+	   <input class="modal-in" type="number" id="modalRate" placeholder="4" min="0.5" step="0.5">
+	  </div>
+	  <div style="flex:1;">
+	   <div class="modal-lbl">单位</div>
+	   <input class="modal-in" type="text" id="modalUnit" placeholder="节">
+	  </div>
+	 </div>
+	</div>
+	<div class="modal-row-2">
+	 <div>
+	  <div class="modal-lbl">所属模块</div>
+	  <select class="modal-in" id="modalSection" style="cursor:pointer;"></select>
+	 </div>
+	</div>
+	<div class="modal-btns">
+	 <button class="mbtn cancel" onclick="closeModal()">取消</button>
+	 <button class="mbtn ok" onclick="saveItem()">保存</button>
+	</div>
+   </div>
+  </div>
+  <!-- 板块 Modal -->
+  <div class="overlay" id="sectionOverlay">
+   <div class="modal">
+	<div class="modal-t" id="sectionModalTitle">编辑板块</div>
+	<div class="modal-row">
+	 <div class="modal-lbl">板块名称</div>
+	 <input class="modal-in" type="text" id="sectionNameInput" placeholder="例：自习室数学">
+	</div>
+	<div class="modal-row">
+	 <div class="modal-lbl">时间/备注</div>
+	 <input class="modal-in" type="text" id="sectionTimeInput" placeholder="例：06:30 — 09:30">
+	</div>
+	<div class="modal-row">
+	 <div class="modal-lbl">主题颜色</div>
+	 <div class="color-dots" id="sectionColorDots">
+	  <div class="cdot-sel chosen" data-color="#C8922A" style="background:#C8922A;" onclick="selectSectionColor(this)"></div>
+	  <div class="cdot-sel" data-color="#E5B84A" style="background:#E5B84A;" onclick="selectSectionColor(this)"></div>
+	  <div class="cdot-sel" data-color="#3A7FC8" style="background:#3A7FC8;" onclick="selectSectionColor(this)"></div>
+	  <div class="cdot-sel" data-color="#C84040" style="background:#C84040;" onclick="selectSectionColor(this)"></div>
+	  <div class="cdot-sel" data-color="#3A9E6A" style="background:#3A9E6A;" onclick="selectSectionColor(this)"></div>
+	  <div class="cdot-sel" data-color="#7A4AC8" style="background:#7A4AC8;" onclick="selectSectionColor(this)"></div>
+	  <div class="cdot-sel" data-color="#A0A0FF" style="background:#A0A0FF;" onclick="selectSectionColor(this)"></div>
+	  <div class="cdot-sel" data-color="#E07070" style="background:#E07070;" onclick="selectSectionColor(this)"></div>
+	 </div>
+	 <input type="hidden" id="sectionColorInput" value="#C8922A">
+	</div>
+	<div class="modal-row">
+	 <div class="modal-lbl">板块类型</div>
+	 <label style="display:flex;align-items:center;gap:8px;color:var(--dim2);font-size:13px;"> <input type="checkbox" id="sectionDeductCheck"> 扣分项目 </label>
+	</div>
+	<div class="modal-btns">
+	 <button class="mbtn cancel" onclick="closeSectionModal()">取消</button>
+	 <button class="mbtn ok" onclick="saveSection()">保存</button>
+	</div>
+   </div>
+  </div>
+  <!-- Celebration -->
+  <div class="celeb" id="celeb">
+   <div class="celeb-p" id="celebP"></div>
+   <div class="celeb-t" id="celebT">已记录</div>
+  </div>
+  <script>
+// ════════════════════════════════════
+//  STORE
+// ════════════════════════════════════
+const STORE={
+  get(k){try{return JSON.parse(localStorage.getItem(k))||null}catch{return null}},
+  set(k,v){localStorage.setItem(k,JSON.stringify(v))},
+  del(k){localStorage.removeItem(k)}
+};
+
+// ════════════════════════════════════
+//  DEFAULT DATA (无默认模板)
+// ════════════════════════════════════
+const DEFAULT_SECTIONS = [];
+
+const ACHIEVEMENTS_DEF=[
+  {id:'a0',icon:'🌟',name:'初次觉醒',desc:'第一次保存记录'},
+  {id:'a1',icon:'⚔️',name:'首战告捷',desc:'积分首次超过80'},
+  {id:'a2',icon:'🔥',name:'三日连胜',desc:'达成3天连胜'},
+  {id:'a3',icon:'🗡️',name:'战士崛起',desc:'达成7天连胜'},
+  {id:'a4',icon:'⚙️',name:'习惯铸造',desc:'达成21天连胜'},
+  {id:'a5',icon:'🧠',name:'神经重塑',desc:'达成66天连胜'},
+  {id:'a6',icon:'💎',name:'满贯之日',desc:'单日无扣分且三项结算全中'},
+  {id:'a7',icon:'💯',name:'百分战士',desc:'单日积分超过100'},
+  {id:'a8',icon:'👑',name:'传说时刻',desc:'单日积分超过140'},
+  {id:'a9',icon:'📈',name:'进步无止',desc:'连续7天积分进步'},
+  {id:'a11',icon:'🌙',name:'节律之主',desc:'连续7天22:30前躺下'},
+];
+
+const LEVEL_THRESHOLDS=[0,100,250,500,850,1350,2000,2850,4000,5500,7500];
+const LEVEL_NAMES=['觉醒者','学徒','践行者','战士','铸造者','掌舵者','学者','精英','大师','传说','神话'];
+
+const IDENTITY_NAMES_DEFAULT=['入门','平台','熟练','大师'];
+const STREAK_MILESTONES=[3,7,21,66];
+
+// ════════════════════════════════════
+//  ACCESSORS
+// ════════════════════════════════════
+function getSections(){return STORE.get('apex_sections')||DEFAULT_SECTIONS;}
+function saveSections(s){STORE.set('apex_sections',s);}
+function getHistory(){return STORE.get('apex_history')||{};}
+function getAchievements(){return STORE.get('apex_achievements')||[];}
+function getIdentityNames(){return STORE.get('apex_id_names')||IDENTITY_NAMES_DEFAULT;}
+function getIdentityClaimed(){return STORE.get('apex_id_claimed')||[];}
+function getStreakThreshold(){return STORE.get('apex_streak_threshold')||80;}
+function getTheme(){return STORE.get('apex_theme')||'dark';}
+function setTheme(theme){STORE.set('apex_theme',theme);}
+
+// ════════════════════════════════════
+//  STATE
+// ════════════════════════════════════
+let currentScore=0, subtotals={}, calcValues={}, celebTimer, celebTimer2;
+let editingItem=null, editingSectionId=null;
+
+const now=new Date();
+const todayKey=`${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+document.getElementById('dateStr').textContent=`${now.getMonth()+1}月${now.getDate()}日`;
+
+// ════════════════════════════════════
+//  THEME
+// ════════════════════════════════════
+function toggleTheme() {
+  const body = document.body;
+  const isLight = body.classList.contains('light');
+  if (isLight) {
+	body.classList.remove('light');
+	setTheme('dark');
+  } else {
+	body.classList.add('light');
+	setTheme('light');
+  }
+}
+// 初始化主题
+(function initTheme() {
+  const theme = getTheme();
+  if (theme === 'light') document.body.classList.add('light');
+})();
+
+// ════════════════════════════════════
+//  SOUND ENGINE (Web Audio API)
+// ════════════════════════════════════
+let audioCtx=null;
+function getAudio(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq,type,vol,dur,delay=0){
+  try{
+	const ctx=getAudio();
+	const osc=ctx.createOscillator();
+	const gain=ctx.createGain();
+	osc.connect(gain); gain.connect(ctx.destination);
+	osc.type=type; osc.frequency.value=freq;
+	const t=ctx.currentTime+delay;
+	gain.gain.setValueAtTime(0,t);
+	gain.gain.linearRampToValueAtTime(vol,t+0.01);
+	gain.gain.exponentialRampToValueAtTime(0.001,t+dur);
+	osc.start(t); osc.stop(t+dur+0.05);
+  }catch(e){}
+}
+function soundTick(){
+  playTone(880,'sine',0.18,0.08);
+}
+function soundMilestone(){
+  playTone(523,'sine',0.15,0.12);
+  playTone(784,'sine',0.12,0.15,0.1);
+}
+function soundSave(){
+  playTone(392,'sine',0.14,0.25);
+  playTone(523,'sine',0.12,0.25,0.05);
+  playTone(659,'sine',0.10,0.3,0.1);
+}
+function soundLevelUp(){
+  [523,659,784,1047].forEach((f,i)=>playTone(f,'square',0.12,0.2,i*0.1));
+  setTimeout(()=>playTone(1047,'sine',0.18,0.5),450);
+}
+function soundAchievement(){
+  playTone(880,'square',0.14,0.1);
+  playTone(1109,'sine',0.12,0.3,0.12);
+  playTone(1318,'sine',0.10,0.4,0.25);
+}
+function soundAttack(){
+  try{
+	const ctx=getAudio();
+	const buf=ctx.createBuffer(1,ctx.sampleRate*0.15,ctx.sampleRate);
+	const data=buf.getChannelData(0);
+	for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*Math.pow(1-i/data.length,3)*0.6;
+	const src=ctx.createBufferSource();
+	const g=ctx.createGain(); g.gain.value=1;
+	src.buffer=buf; src.connect(g); g.connect(ctx.destination);
+	src.start();
+	playTone(80,'sawtooth',0.2,0.15,0.02);
+  }catch(e){}
+}
+function soundDeduct(){
+  playTone(180,'sawtooth',0.15,0.12);
+  playTone(140,'sawtooth',0.10,0.1,0.08);
+}
+
+// ════════════════════════════════════
+//  XP & LEVEL
+// ════════════════════════════════════
+function computeTotalXP(){
+  const hist=getHistory();
+  const dates=Object.keys(hist).sort();
+  let xp=0;
+  dates.forEach(d=>{ xp+=(hist[d].score||0)*0.5; });
+  return Math.round(xp);
+}
+
+function getLevelInfo(xp){
+  let lv=0;
+  for(let i=0;i<LEVEL_THRESHOLDS.length-1;i++){
+	if(xp>=LEVEL_THRESHOLDS[i]) lv=i;
+	else break;
+  }
+  const cur=LEVEL_THRESHOLDS[lv]||0;
+  const next=LEVEL_THRESHOLDS[lv+1]||cur+1000;
+  return{lv:lv+1,name:LEVEL_NAMES[lv]||'传说',cur,next,progress:xp-cur,range:next-cur};
+}
+
+function getCharClass(){
+  const hist=getHistory();
+  const keys=Object.keys(hist).sort().slice(-7);
+  if(!keys.length) return{cls:'未知职业',sub:'积累数据中...'};
+  const avg=keys.reduce((s,k)=>s+(hist[k].score||0),0)/keys.length;
+  if(avg>=120) return{cls:'钢铁铸造者',sub:'近7日平均'+Math.round(avg)+'分 · 精英级'};
+  if(avg>=90) return{cls:'践行战士',sub:'近7日平均'+Math.round(avg)+'分 · 稳定推进'};
+  if(avg>=60) return{cls:'学徒',sub:'近7日平均'+Math.round(avg)+'分 · 成长中'};
+  return{cls:'觉醒者',sub:'近7日平均'+Math.round(avg)+'分 · 刚刚开始'};
+}
+
+// ════════════════════════════════════
+//  STATUS EFFECTS
+// ════════════════════════════════════
+function computeStatusEffects(){
+  const hist=getHistory();
+  const keys=Object.keys(hist).sort();
+  if(!keys.length) return[];
+  const effects=[];
+  const last=keys[keys.length-1];
+  const yd=hist[last];
+  const ydScore=yd?yd.score:0;
+  const streak=computeStreak(getStreakThreshold()).current;
+
+  if(streak>=7) effects.push({type:'buff',icon:'🔥',name:'燃烧连胜',desc:`连胜已达${streak}天，今日任务XP奖励提升50%`});
+  else if(streak>=3) effects.push({type:'buff',icon:'⚡',name:'连击状态',desc:`${streak}天连胜中，继续保持势头`});
+
+  if(ydScore>=110) effects.push({type:'buff',icon:'🔱',name:'锐利',desc:`昨日${ydScore}分，处于高强度状态`});
+  else if(ydScore>=80) effects.push({type:'buff',icon:'✅',name:'稳定',desc:`昨日${ydScore}分，状态稳定`});
+  else if(ydScore>0&&ydScore<60) effects.push({type:'debuff',icon:'🌧',name:'疲软',desc:`昨日仅${ydScore}分，今日是反弹的机会`});
+
+  if(keys.length>=2){
+	const prev=hist[keys[keys.length-2]];
+	const prevScore=prev?prev.score:0;
+	if(ydScore<getStreakThreshold()&&ydScore<=prevScore&&streak===0){
+	  effects.push({type:'debuff',icon:'💔',name:'连胜中断',desc:'连胜昨日断掉，重新点燃火种'});
+	}
+  }
+
+  if(!effects.length) effects.push({type:'neutral',icon:'🌑',name:'平静',desc:'无特殊状态效果'});
+  return effects;
+}
+
+function renderStatusStrip(){
+  const strip=document.getElementById('statusStrip');
+  if(!strip) return;
+  const efx=computeStatusEffects();
+  strip.innerHTML=efx.map(e=>`<div class="sfx ${e.type}">${e.icon} ${e.name}</div>`).join('');
+}
+
+// ════════════════════════════════════
+//  CHARACTER PAGE
+// ════════════════════════════════════
+function renderChar(){
+  const totalXP=computeTotalXP();
+  const li=getLevelInfo(totalXP);
+  const cc=getCharClass();
+  const hist=getHistory();
+  const days=Object.keys(hist).length;
+
+  document.getElementById('charLvBadge').textContent='LV '+li.lv;
+  document.getElementById('charClass').textContent=li.name;
+  document.getElementById('charClassSub').textContent='职业：'+cc.cls+' · '+cc.sub;
+  document.getElementById('xpText').textContent=(totalXP-li.cur)+' / '+li.range+' XP';
+  document.getElementById('xpFill').style.width=Math.min(100,(li.progress/li.range)*100)+'%';
+  document.getElementById('charTotalXP').textContent=Math.round(totalXP);
+  document.getElementById('charDays').textContent=days;
+  document.getElementById('charQuestXP').textContent=computeStreak(getStreakThreshold()).current;
+
+  const efx=computeStatusEffects();
+  document.getElementById('seList').innerHTML=efx.length?efx.map(e=>`
+	<div class="se-item ${e.type}">
+	  <div class="se-icon">${e.icon}</div>
+	  <div class="se-text">
+		<div class="se-name">${e.name}</div>
+		<div class="se-desc">${e.desc}</div>
+	  </div>
+	</div>`).join(''):'<div style="font-size:12px;color:var(--dim2);">保存记录后状态效果将出现</div>';
+
+  const unlocked=getAchievements();
+  document.getElementById('achGrid').innerHTML=ACHIEVEMENTS_DEF.map(a=>`
+	<div class="ach ${unlocked.includes(a.id)?'unlocked':''}">
+	  <div class="ach-icon">${a.icon}</div>
+	  <div class="ach-name">${a.name}</div>
+	  <div class="ach-desc">${a.desc}</div>
+	</div>`).join('');
+}
+
+// ════════════════════════════════════
+//  ACHIEVEMENTS CHECK
+// ════════════════════════════════════
+function checkAchievements(score){
+  const hist=getHistory();
+  const keys=Object.keys(hist).sort();
+  let unlocked=[...getAchievements()];
+  const newlyUnlocked=[];
+  const add=(id)=>{if(!unlocked.includes(id)){unlocked.push(id);newlyUnlocked.push(id);}};
+
+  if(keys.length>=1) add('a0');
+  if(score>80) add('a1');
+  if(score>100) add('a7');
+  if(score>140) add('a8');
+
+  const streak=computeStreak(getStreakThreshold()).current;
+  if(streak>=3) add('a2');
+  if(streak>=7) add('a3');
+  if(streak>=21) add('a4');
+  if(streak>=66) add('a5');
+
+  if(keys.length>=7){
+	let consec=true;
+	for(let i=keys.length-1;i>keys.length-7;i--){
+	  if(hist[keys[i]].score<=hist[keys[i-1]].score){consec=false;break;}
+	}
+	if(consec) add('a9');
+  }
+
+  STORE.set('apex_achievements',unlocked);
+  return newlyUnlocked;
+}
+
+// ════════════════════════════════════
+//  TODAY
+// ════════════════════════════════════
+function renderToday(){
+  const sections = getSections();
+  const inner = document.getElementById('todayInner');
+  inner.innerHTML = ''; subtotals = {}; calcValues = {};
+
+  if (sections.length === 0) {
+	inner.innerHTML = `
+	  <div style="text-align:center; padding:40px 20px; color:var(--dim2);">
+		<div style="font-size:28px; margin-bottom:12px;">📋</div>
+		<div style="font-size:15px; margin-bottom:6px;">还没有任何板块</div>
+		<div style="font-size:12px;">点击下方「管理板块」按钮创建你的第一个板块</div>
+	  </div>
+	`;
+  } else {
+	sections.forEach(sec => {
+	  const sid = sec.id; subtotals[sid]=0;
+	  const wrapper = document.createElement('div');
+	  wrapper.className = 'sec';
+	  if(sec.deduct) wrapper.style.borderColor='rgba(200,64,64,0.2)';
+
+	  const hd = document.createElement('div');
+	  hd.className = 'sec-hd';
+	  if(sec.deduct) hd.style.background='rgba(200,64,64,0.04)';
+	  hd.innerHTML = `
+		<div class="sec-l">
+		  <div class="sdot" style="background:${sec.color}"></div>
+		  <div>
+			<div class="sn" style="${sec.deduct?'color:#E07070':''}">${sec.name}</div>
+			<div class="st">${sec.time||''}</div>
+		  </div>
+		</div>
+		<div class="sec-r">
+		  <div class="ssub" id="sub_${sid}" style="${sec.deduct?'color:#C84040':''}">${sec.deduct?'-':''}0</div>
+		  <div class="arr">▾</div>
+		</div>`;
+	  hd.onclick=()=>{const bd=hd.nextElementSibling;bd.classList.toggle('hid');hd.querySelector('.arr').classList.toggle('cl');};
+	  wrapper.appendChild(hd);
+
+	  const bd = document.createElement('div');
+	  bd.className = 'sec-bd'; bd.id = 'bd_'+sid;
+
+	  // 预置项（保留但不会出现）
+	  const allItems = sec.calcItems||sec.items||[];
+	  allItems.forEach(it=>{
+		if(it.type==='calc'||(!it.type&&it.rate!==undefined)){
+		  const rid='res_'+it.id;
+		  const row = document.createElement('div'); row.className='calc-row';
+		  row.innerHTML = `
+			<div class="cl">${it.label}</div>
+			<input class="ci2" type="number" min="0" placeholder="0" oninput="onCalc('${it.id}','${sid}',${it.rate},'${rid}')">
+			<div class="cr">${it.unit} × ${it.rate}</div>
+			<div class="cres" id="${rid}">0</div>`;
+		  bd.appendChild(row); calcValues[it.id]=0;
+		} else if(sec.deduct){
+		  const did='dv_'+it.id;
+		  const row = document.createElement('div'); row.className='ded-row';
+		  row.innerHTML = `
+			<div class="dl">${it.label}</div>
+			<input class="di" type="number" min="0" placeholder="0" oninput="onDeduct('${it.id}','${sid}',${it.pts},'${did}')">
+			<div class="dv" id="${did}">-0</div>`;
+		  bd.appendChild(row); calcValues[it.id]=0;
+		} else {
+		  const el = document.createElement('div'); el.className='item'; el.id='item_'+it.id;
+		  el.innerHTML = `
+			<div class="chk"><div class="ci">✓</div></div>
+			<div class="ilbl">${it.label}</div><div class="ipts">+${it.pts}</div>`;
+		  el.onclick = () => tapItem(el,it.pts,sid);
+		  bd.appendChild(el);
+		}
+	  });
+
+	  // 自定义事项
+	  (STORE.get('apex_custom_'+sid)||[]).forEach(it=>{
+		if (it.type === 'calc') {
+		  const rid = 'res_'+it.id;
+		  const row = document.createElement('div'); row.className = 'calc-row';
+		  row.innerHTML = `
+			<div class="cl">${it.label}</div>
+			<input class="ci2" type="number" min="0" placeholder="0" oninput="onCalc('${it.id}','${sid}',${it.rate},'${rid}')">
+			<div class="cr">${it.unit} × ${it.rate}</div>
+			<div class="cres" id="${rid}">0</div>`;
+		  bd.appendChild(row);
+		  calcValues[it.id] = 0;
+		} else if (it.type === 'counter') {
+		  const rid = 'cnt_'+it.id;
+		  const row = document.createElement('div'); row.className = 'calc-row';
+		  row.innerHTML = `
+			<div class="cl">${it.label}</div>
+			<div style="display:flex; align-items:center; gap:4px;">
+			  <button class="mbtn" style="background:var(--bg3); border:1px solid var(--border); color:var(--gold2); font-size:14px; padding:2px 8px;" onclick="incCounter('${it.id}','${sid}',${it.pts})">+1</button>
+			  <span class="cres" id="${rid}">0</span>
+			</div>
+			<div class="cr">× ${it.pts}</div>`;
+		  bd.appendChild(row);
+		  calcValues[it.id] = 0;
+		} else {
+		  const el = document.createElement('div'); el.className='item'; el.id='item_'+it.id;
+		  el.innerHTML = `
+			<div class="chk"><div class="ci">✓</div></div>
+			<div class="ilbl">${it.label}</div><div class="ipts">+${it.pts}</div>`;
+		  el.onclick = () => tapItem(el, it.pts, sid);
+		  bd.appendChild(el);
+		}
+	  });
+
+	  wrapper.appendChild(bd);
+	  inner.appendChild(wrapper);
+	});
+  }
+
+  // 底部管理面板（包含主题切换和重置按钮）
+  inner.insertAdjacentHTML('beforeend', `
+	<div class="collapse-sec" style="margin-top:20px;">
+	  <div class="collapse-hd" onclick="toggleCollapse('managePanel')">
+		<span class="collapse-title">⚙ 管理板块 & 自定义事项</span>
+		<span class="collapse-arr" id="arr-managePanel">▾</span>
+	  </div>
+	  <div class="collapse-bd hid" id="bd-managePanel">
+		<!-- 主题切换行 -->
+		<div class="setting-row" style="border-bottom:2px solid var(--border); margin-bottom:8px;">
+		  <span>🌓 主题模式</span>
+		  <label style="display:flex; align-items:center; gap:8px;">
+			<span style="font-size:12px;">深色</span>
+			<input type="checkbox" id="themeToggle" onchange="toggleTheme()" ${document.body.classList.contains('light')?'checked':''} style="width:40px; height:20px; accent-color:var(--gold);">
+			<span style="font-size:12px;">浅色</span>
+		  </label>
+		</div>
+		<div class="new-section-btn" style="margin:12px 0;" onclick="openNewSectionModal()">➕ 新建板块</div>
+		<div id="todayCustomizeInner"></div>
+		<!-- 重置所有数据按钮 -->
+		<button class="clr-btn" style="margin-top:12px;" onclick="resetAllData()">🧹 重置所有数据（清空板块、历史、成就）</button>
+	  </div>
+	</div>
+  `);
+
+  renderStatusStrip();
+}
+
+function tapItem(el,pts,sid){
+  const was=el.classList.contains('on');
+  el.classList.toggle('on');
+  if(!was){
+	soundTick();
+	celebrate('+'+pts);
+  }
+  recomputeSub(sid);
+}
+
+function onCalc(iid,sid,rate,rid){
+  const input=document.querySelector(`[oninput*="'${iid}'"]`);
+  const val=parseFloat(input?input.value:0)||0;
+  const result=Math.round(val*rate*10)/10;
+  const el=document.getElementById(rid);
+  if(el) el.textContent=result;
+  calcValues[iid]=result;
+  recomputeSub(sid);
+}
+
+function onDeduct(iid,sid,rate,did){
+  const input=document.querySelector(`[oninput*="'${iid}'"]`);
+  const val=parseFloat(input?input.value:0)||0;
+  const result=Math.round(val*rate*10)/10;
+  const el=document.getElementById(did);
+  if(el) el.textContent='-'+result;
+  if(result>0) soundDeduct();
+  calcValues[iid]=result;
+  recomputeSub(sid);
+}
+
+function incCounter(iid, sid, pts) {
+  calcValues[iid] = (calcValues[iid] || 0) + 1;
+  const el = document.getElementById('cnt_'+iid);
+  if (el) el.textContent = calcValues[iid];
+  recomputeSub(sid);
+  soundTick();
+  celebrate('+'+pts);
+}
+
+function recomputeSub(sid){
+  const bd=document.getElementById('bd_'+sid);
+  if(!bd) return;
+  let sum=0;
+  bd.querySelectorAll('.item.on .ipts').forEach(el=>{sum+=parseFloat(el.textContent.replace('+',''))||0;});
+  bd.querySelectorAll('.cres').forEach(el=>{sum+=parseFloat(el.textContent)||0;});
+  const sec=getSections().find(s=>s.id===sid);
+  if(sec&&sec.deduct){
+	sum=0;
+	bd.querySelectorAll('.dv').forEach(el=>{sum+=parseFloat(el.textContent.replace('-',''))||0;});
+	document.getElementById('sub_'+sid).textContent='-'+Math.round(sum*10)/10;
+	subtotals[sid]=-Math.round(sum*10)/10;
+  } else {
+	document.getElementById('sub_'+sid).textContent=Math.round(sum*10)/10;
+	subtotals[sid]=Math.round(sum*10)/10;
+  }
+  recompute();
+}
+
+function recompute(){
+  let total=0;
+  Object.values(subtotals).forEach(v=>{total+=v;});
+  const prev=currentScore;
+  currentScore=Math.max(0,Math.round(total*10)/10);
+  document.getElementById('totalScore').textContent=currentScore;
+  document.getElementById('progFill').style.width=Math.min(100,(currentScore/160)*100)+'%';
+  const milestones=[50,80,100,120,140];
+  milestones.forEach(m=>{if(prev<m&&currentScore>=m) soundMilestone();});
+  updateDiff();
+}
+
+function updateDiff(){
+  const yd=parseFloat(document.getElementById('ydInput').value)||0;
+  const diff=Math.round((currentScore-yd)*10)/10;
+  const el=document.getElementById('scoreDiff');
+  if(!yd){el.textContent='vs 昨日 —';el.className='sc-vs eq';}
+  else if(diff>0){el.textContent='+'+diff+' 超越昨日';el.className='sc-vs up';}
+  else if(diff<0){el.textContent=diff+' 低于昨日';el.className='sc-vs dn';}
+  else{el.textContent='持平昨日';el.className='sc-vs eq';}
+}
+
+function saveToday(){
+  const hist=getHistory();
+  const prevLevel=getLevelInfo(computeTotalXP()).lv;
+
+  hist[todayKey]={score:currentScore};
+  STORE.set('apex_history',hist);
+
+  const newLevel=getLevelInfo(computeTotalXP()).lv;
+  const newAchs=checkAchievements(currentScore);
+  const didLevelUp=newLevel>prevLevel;
+
+  if(didLevelUp){
+	soundLevelUp();
+	celebrateBig('⬆ LEVEL UP → LV '+newLevel+'！');
+  } else if(newAchs.length){
+	const a=ACHIEVEMENTS_DEF.find(d=>d.id===newAchs[0]);
+	soundAchievement();
+	celebrateBig('🏆 成就解锁：'+(a?a.name:''));
+  } else {
+	soundSave();
+	celebrate('已保存 '+currentScore+' 分');
+  }
+}
+
+// ════════════════════════════════════
+//  HISTORY
+// ════════════════════════════════════
+function renderHistory(){
+  const hist=getHistory();
+  const keys=Object.keys(hist).sort();
+  const scores=keys.map(k=>hist[k].score);
+
+  document.getElementById('statDays').textContent=keys.length;
+  document.getElementById('statBest').textContent=keys.length?Math.max(...scores):0;
+  document.getElementById('statAvg').textContent=keys.length?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1):0;
+
+  drawChart(keys,scores);
+
+  const list=document.getElementById('histList');
+  if(!keys.length){list.innerHTML='<div class="no-data">还没有记录<div class="no-data-s">完成今天的积分表后点击保存</div></div>';return;}
+  list.innerHTML='';
+  [...keys].reverse().forEach((k,i,arr)=>{
+	const d=hist[k];
+	const prevKey=arr[i+1];
+	const prevScore=prevKey?hist[prevKey].score:null;
+	const diff=prevScore!==null?Math.round((d.score-prevScore)*10)/10:null;
+	let diffH='';
+	if(diff!==null){
+	  if(diff>0)diffH=`<div class="hi-diff up">+${diff}</div>`;
+	  else if(diff<0)diffH=`<div class="hi-diff dn">${diff}</div>`;
+	  else diffH=`<div class="hi-diff eq">持平</div>`;
+	}
+	const pts=k.split('-');
+	list.innerHTML+=`<div class="hi">
+	  <div class="hi-top">
+		<div><div class="hi-date">${parseInt(pts[1])}月${parseInt(pts[2])}日</div></div>
+		<div style="text-align:right"><div class="hi-score">${d.score}</div>${diffH}</div>
+	  </div></div>`;
+  });
+}
+
+function clearHistory(){
+  if(confirm('确定要清除所有历史记录吗？')){
+	STORE.del('apex_history');STORE.del('apex_achievements');STORE.del('apex_quest_xp');
+	renderHistory();renderChar();
+  }
+}
+
+function drawChart(keys,scores){
+  const canvas=document.getElementById('scoreChart');
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.parentElement.clientWidth-24, H=150;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  if(scores.length<2){ctx.fillStyle='#4A4A62';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('至少需要两天记录才能显示曲线',W/2,H/2);return;}
+  const pad={t:14,b:26,l:34,r:10};
+  const cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+  const maxS=Math.max(...scores,50),minS=Math.max(0,Math.min(...scores)-10);
+  const xOf=i=>pad.l+(i/(scores.length-1))*cW;
+  const yOf=v=>pad.t+cH-((v-minS)/(maxS-minS))*cH;
+  ctx.strokeStyle='#1C1C28';ctx.lineWidth=1;
+  [.25,.5,.75,1].forEach(t=>{
+	const y=pad.t+cH*(1-t);
+	ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+	ctx.fillStyle='#4A4A62';ctx.font='10px sans-serif';ctx.textAlign='right';
+	ctx.fillText(Math.round((minS+(maxS-minS)*t)*10)/10,pad.l-3,y+4);
+  });
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+cH);
+  grad.addColorStop(0,'rgba(200,146,42,.22)');grad.addColorStop(1,'rgba(200,146,42,0)');
+  ctx.beginPath();ctx.moveTo(xOf(0),yOf(scores[0]));
+  scores.forEach((s,i)=>{if(i>0)ctx.lineTo(xOf(i),yOf(s));});
+  ctx.lineTo(xOf(scores.length-1),pad.t+cH);ctx.lineTo(xOf(0),pad.t+cH);
+  ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();ctx.moveTo(xOf(0),yOf(scores[0]));
+  scores.forEach((s,i)=>{if(i>0)ctx.lineTo(xOf(i),yOf(s));});
+  ctx.strokeStyle='#C8922A';ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+  scores.forEach((s,i)=>{
+	ctx.beginPath();ctx.arc(xOf(i),yOf(s),4,0,Math.PI*2);
+	ctx.fillStyle='#E5B84A';ctx.fill();ctx.strokeStyle='#060608';ctx.lineWidth=1.5;ctx.stroke();
+  });
+  const step=Math.max(1,Math.floor(scores.length/6));
+  ctx.fillStyle='#4A4A62';ctx.font='10px sans-serif';ctx.textAlign='center';
+  keys.forEach((k,i)=>{
+	if(i%step===0||i===keys.length-1){const p=k.split('-');ctx.fillText(`${parseInt(p[1])}/${parseInt(p[2])}`,xOf(i),H-6);}
+  });
+}
+
+// ════════════════════════════════════
+//  STREAK & BOSS & PLAYER
+// ════════════════════════════════════
+function computeStreak(threshold){
+  const hist=getHistory();
+  const dates=Object.keys(hist).sort();
+  if(!dates.length) return{current:0,max:0};
+  let maxS=0,running=0;
+  for(let i=0;i<dates.length;i++){
+	const score=hist[dates[i]].score;
+	const prevScore=i>0?hist[dates[i-1]].score:null;
+	const ok=prevScore===null?(score>=threshold):(score>=threshold||score>prevScore);
+	if(ok)running++;else running=0;
+	if(running>maxS)maxS=running;
+  }
+  return{current:running,max:maxS};
+}
+
+function getBossData(){return STORE.get('apex_boss_v2')||{name:'高考',totalHp:5000,currentHp:5000,unit:'题'};}
+function saveBossData(d){STORE.set('apex_boss_v2',d);}
+function getPlayerData(){return STORE.get('apex_player_v2')||{name:'旅行者',maxHp:365,startDate:''};}
+function savePlayerData(d){STORE.set('apex_player_v2',d);}
+function getTodayDmg(){return STORE.get('apex_boss_dmg_'+todayKey)||0;}
+
+function savePlayerSettings(){
+  const name=document.getElementById('playerNameInput').value||'旅行者';
+  const maxHp=parseInt(document.getElementById('playerMaxHp').value)||365;
+  const startDate=document.getElementById('playerStartDate').value||'';
+  savePlayerData({name,maxHp,startDate});
+  renderBossPlayer();
+}
+
+function saveBossSettings(){
+  const boss=getBossData();
+  boss.name=document.getElementById('bossNameInput').value||'高考';
+  boss.totalHp=parseFloat(document.getElementById('bossTotalHp').value)||boss.totalHp;
+  boss.currentHp=parseFloat(document.getElementById('bossCurrentHp').value);
+  if(isNaN(boss.currentHp)) boss.currentHp=boss.totalHp;
+  boss.unit=document.getElementById('bossUnit').value||'题';
+  saveBossData(boss);
+  renderBossPlayer();
+}
+
+function dealDamage(){
+  const dmg=parseFloat(document.getElementById('dmgInput').value)||0;
+  if(dmg<=0) return;
+  const boss=getBossData();
+  boss.currentHp=Math.max(0,parseFloat((boss.currentHp-dmg).toFixed(1)));
+  saveBossData(boss);
+  const prev=getTodayDmg();
+  STORE.set('apex_boss_dmg_'+todayKey, parseFloat((prev+dmg).toFixed(1)));
+  document.getElementById('dmgInput').value='';
+  renderBossPlayer();
+  soundAttack();
+  celebrate('-'+dmg+' '+boss.unit);
+}
+
+function healBoss(){
+  const todayDmg=getTodayDmg();
+  if(todayDmg<=0) return;
+  const boss=getBossData();
+  boss.currentHp=parseFloat((boss.currentHp+todayDmg).toFixed(1));
+  saveBossData(boss);
+  STORE.set('apex_boss_dmg_'+todayKey,0);
+  renderBossPlayer();
+  celebrate('撤销 +'+todayDmg+' '+boss.unit);
+}
+
+function toggleCollapse(id){
+  const bd=document.getElementById('bd-'+id);
+  const arr=document.getElementById('arr-'+id);
+  if(!bd||!arr) return;
+  const hidden=bd.classList.toggle('hid');
+  arr.classList.toggle('open',!hidden);
+}
+
+function renderBossPlayer(){
+  const pl=getPlayerData();
+  document.getElementById('playerName').textContent=pl.name;
+  document.getElementById('playerHpMax').textContent=pl.maxHp+'天';
+
+  let playerFlavor='设置开始日期后，玩家 HP 将每天自动递减。';
+  let playerHpPct=100, curHp=pl.maxHp;
+  if(pl.startDate){
+	const start=new Date(pl.startDate);
+	const today2=new Date();
+	const elapsed=Math.max(0,Math.floor((today2-start)/(1000*60*60*24)));
+	curHp=Math.max(0,pl.maxHp-elapsed);
+	playerHpPct=Math.min(100,(curHp/pl.maxHp)*100);
+	if(curHp<=0) playerFlavor='⚠️ 生命值耗尽。这段时间窗口已经关闭。';
+	else if(curHp<=30) playerFlavor=`⚠️ HP 危险！仅剩 ${curHp} 天，全力冲刺。`;
+	else playerFlavor=`已度过 ${elapsed} 天，剩余 ${curHp} 天 HP。`;
+  }
+  document.getElementById('playerHpCur').textContent=curHp;
+  document.getElementById('playerHpFill').style.width=playerHpPct+'%';
+  document.getElementById('playerFlavor').textContent=playerFlavor;
+
+  const boss=getBossData();
+  document.getElementById('bossDisplayName').textContent=boss.name;
+  const hp=parseFloat(boss.currentHp)||0;
+  const total=parseFloat(boss.totalHp)||1;
+  document.getElementById('bossHpCur').textContent=hp;
+  document.getElementById('bossHpUnitDisp').textContent=boss.unit;
+  const bossPct=Math.min(100,(hp/total)*100);
+  document.getElementById('bossHpFill').style.width=bossPct+'%';
+  const dealt=parseFloat((total-hp).toFixed(1));
+  let flavorText='';
+  if(hp<=0) flavorText='🏆 BOSS 已被击败！';
+  else if(bossPct<=20) flavorText=`⚠️ Boss 血量危急（${Math.round(bossPct)}%）。最后一击！`;
+  else flavorText=`已造成总伤害：${dealt} ${boss.unit}，剩余 ${hp} ${boss.unit}（${Math.round(bossPct)}% HP）`;
+  document.getElementById('bossFlavor').textContent=flavorText;
+
+  document.getElementById('dmgUnitLabel').textContent=boss.unit;
+  document.getElementById('todayDmgUnit').textContent=boss.unit;
+  document.getElementById('todayDmg').textContent=getTodayDmg();
+
+  const pni=document.getElementById('playerNameInput');
+  if(pni&&document.activeElement!==pni) pni.value=pl.name;
+  const pmh=document.getElementById('playerMaxHp');
+  if(pmh&&document.activeElement!==pmh) pmh.value=pl.maxHp;
+  const psd=document.getElementById('playerStartDate');
+  if(psd&&document.activeElement!==psd) psd.value=pl.startDate||'';
+  const bni=document.getElementById('bossNameInput');
+  if(bni&&document.activeElement!==bni) bni.value=boss.name;
+  const bth=document.getElementById('bossTotalHp');
+  if(bth&&document.activeElement!==bth) bth.value=boss.totalHp;
+  const bch=document.getElementById('bossCurrentHp');
+  if(bch&&document.activeElement!==bch) bch.value=boss.currentHp;
+  const bu=document.getElementById('bossUnit');
+  if(bu&&document.activeElement!==bu) bu.value=boss.unit;
+}
+
+function renderStreak(){
+  const threshold=parseInt(document.getElementById('streakThreshold').value)||80;
+  STORE.set('apex_streak_threshold',threshold);
+  const{current,max}=computeStreak(threshold);
+  document.getElementById('currentStreak').textContent=current;
+  document.getElementById('maxStreak').textContent=max;
+  document.getElementById('streakProgFill').style.width=Math.min(100,(current/66)*100)+'%';
+
+  renderBossPlayer();
+
+  const names=getIdentityNames();
+  const claimed=getIdentityClaimed();
+  const container=document.getElementById('identityCards');
+  container.innerHTML='';
+  STREAK_MILESTONES.forEach((m,idx)=>{
+	const unlocked=current>=m;
+	const card=document.createElement('div');
+	card.className='id-card'+(unlocked?' unlocked':'');
+	card.innerHTML=`
+	  <div class="id-title">
+		<input type="text" value="${names[idx]||''}" class="modal-in" style="font-size:13px;padding:3px 6px;width:80px;text-align:center;" placeholder="身份" readonly>
+		<button onclick="editIdentityName(${idx})">✎</button>
+	  </div>
+	  <div class="id-days">${m}日达成</div>
+	  <div class="id-check">
+		<input type="checkbox" ${unlocked?'':'disabled'} ${claimed.includes(idx)?'checked':''} onchange="toggleClaim(${idx})">
+		<span>${unlocked?'已认同':'未解锁'}</span>
+	  </div>`;
+	container.appendChild(card);
+  });
+}
+
+function editIdentityName(idx){
+  const names=getIdentityNames();
+  const n=prompt('输入新的身份名称',names[idx]);
+  if(n&&n.trim()){names[idx]=n.trim();STORE.set('apex_id_names',names);renderStreak();}
+}
+
+function toggleClaim(idx){
+  let c=getIdentityClaimed();
+  if(c.includes(idx))c=c.filter(i=>i!==idx);else c.push(idx);
+  STORE.set('apex_id_claimed',c);
+  renderStreak();
+}
+
+// ════════════════════════════════════
+//  CUSTOMIZE (管理面板)
+// ════════════════════════════════════
+function renderTodayCustomize() {
+  const sections = getSections();
+  const container = document.getElementById('todayCustomizeInner');
+  if (!container) return;
+  container.innerHTML = '';
+  sections.forEach(sec => {
+	const customItems = STORE.get('apex_custom_'+sec.id) || [];
+	const wrap = document.createElement('div'); wrap.className = 'cust-sec';
+	wrap.innerHTML = `
+	  <div class="cust-hd">
+		<div class="cust-hn" style="color:${sec.color}">${sec.name}</div>
+		<div class="hd-actions">
+		  <button class="edit-btn" onclick="openEditSectionModal('${sec.id}')">✎</button>
+		  <button class="del-section-btn" onclick="deleteSection('${sec.id}')">🗑</button>
+		  <button class="add-btn" onclick="openAddModal('${sec.id}')">+ 事项</button>
+		</div>
+	  </div>
+	  <div>
+		${customItems.length===0?`<div style="padding:10px 12px;font-size:12px;color:var(--dim2);">暂无自定义事项</div>`:''}
+		${customItems.map(it=>`
+		  <div class="cust-item">
+			<div class="cust-name">${it.label}</div>
+			<div class="cust-pts-badge">${
+			  it.type==='calc' ? it.rate+'/'+it.unit : 
+			  it.type==='counter' ? '🔁 +'+it.pts : '+'+it.pts
+			}</div>
+			<button class="cust-edit" onclick="openEditModal('${sec.id}','${it.id}')">✎</button>
+			<button class="cust-del" onclick="deleteItem('${sec.id}','${it.id}')">✕</button>
+		  </div>`).join('')}
+	  </div>`;
+	container.appendChild(wrap);
+  });
+}
+
+function deleteSection(secId){
+  if(!confirm(`确定要删除板块「${getSections().find(s=>s.id===secId)?.name}」吗？`)) return;
+  let s=getSections().filter(s=>s.id!==secId);
+  saveSections(s); STORE.del('apex_custom_'+secId);
+  renderTodayCustomize(); renderToday();
+}
+
+function openNewSectionModal(){
+  editingSectionId=null;
+  document.getElementById('sectionModalTitle').innerText='新建板块';
+  document.getElementById('sectionNameInput').value='';
+  document.getElementById('sectionTimeInput').value='';
+  document.getElementById('sectionColorInput').value='#C8922A';
+  document.getElementById('sectionDeductCheck').checked=false;
+  document.querySelectorAll('#sectionColorDots .cdot-sel').forEach(d=>{
+	d.classList.toggle('chosen',d.dataset.color==='#C8922A');
+  });
+  document.getElementById('sectionOverlay').classList.add('show');
+}
+
+function openEditSectionModal(secId){
+  const sec=getSections().find(s=>s.id===secId); if(!sec) return;
+  editingSectionId=secId;
+  document.getElementById('sectionModalTitle').innerText='编辑板块主题';
+  document.getElementById('sectionNameInput').value=sec.name||'';
+  document.getElementById('sectionTimeInput').value=sec.time||'';
+  document.getElementById('sectionColorInput').value=sec.color||'#C8922A';
+  document.getElementById('sectionDeductCheck').checked=sec.deduct||false;
+  document.querySelectorAll('#sectionColorDots .cdot-sel').forEach(d=>{
+	d.classList.toggle('chosen',d.dataset.color===sec.color);
+  });
+  document.getElementById('sectionOverlay').classList.add('show');
+}
+
+function closeSectionModal(){document.getElementById('sectionOverlay').classList.remove('show');editingSectionId=null;}
+function selectSectionColor(el){
+  document.querySelectorAll('#sectionColorDots .cdot-sel').forEach(d=>d.classList.remove('chosen'));
+  el.classList.add('chosen');
+  document.getElementById('sectionColorInput').value=el.dataset.color;
+}
+function saveSection(){
+  const name=document.getElementById('sectionNameInput').value.trim();
+  const time=document.getElementById('sectionTimeInput').value.trim();
+  const color=document.getElementById('sectionColorInput').value;
+  const isDeduct=document.getElementById('sectionDeductCheck').checked;
+  if(!name) return;
+  const sections=getSections();
+  if(editingSectionId===null){
+	sections.push({id:'sect_'+Date.now(),name,time,color,deduct:isDeduct,items:[]});
+  } else {
+	const idx=sections.findIndex(s=>s.id===editingSectionId);
+	if(idx>=0){sections[idx].name=name;sections[idx].time=time;sections[idx].color=color;sections[idx].deduct=isDeduct;}
+  }
+  saveSections(sections);
+  closeSectionModal(); renderTodayCustomize(); renderToday();
+}
+
+function openAddModal(secId){
+  editingItem={secId,itemId:null};
+  document.getElementById('modalTitle').textContent='添加自定义事项';
+  document.getElementById('modalName').value='';
+  document.getElementById('modalPts').value='';
+  document.getElementById('modalType').value='check';
+  document.getElementById('modalPtsRow').style.display='block';
+  document.getElementById('modalCalcFields').style.display='none';
+  document.getElementById('modalSection').value=secId;
+  document.getElementById('overlay').classList.add('show');
+  setTimeout(()=>document.getElementById('modalName').focus(),100);
+}
+
+function openEditModal(secId,itemId){
+  editingItem={secId,itemId};
+  const items=STORE.get('apex_custom_'+secId)||[];
+  const it=items.find(i=>i.id===itemId); if(!it) return;
+  document.getElementById('modalTitle').textContent='编辑事项';
+  document.getElementById('modalName').value=it.label;
+  document.getElementById('modalType').value=it.type||'check';
+  toggleModalFields(); // 更新字段可见性
+  if(it.type==='calc'){
+	document.getElementById('modalRate').value=it.rate;
+	document.getElementById('modalUnit').value=it.unit||'';
+  } else {
+	document.getElementById('modalPts').value=it.pts;
+  }
+  document.getElementById('modalSection').value=secId;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeModal(){document.getElementById('overlay').classList.remove('show');editingItem=null;}
+
+function toggleModalFields() {
+  const type = document.getElementById('modalType').value;
+  document.getElementById('modalPtsRow').style.display = type !== 'calc' ? 'block' : 'none';
+  document.getElementById('modalCalcFields').style.display = type === 'calc' ? 'block' : 'none';
+}
+
+function saveItem(){
+  const name = document.getElementById('modalName').value.trim();
+  const type = document.getElementById('modalType').value;
+  const secId = document.getElementById('modalSection').value;
+  if(!name) return;
+  
+  let item;
+  if (type === 'calc') {
+	const rate = parseFloat(document.getElementById('modalRate').value) || 1;
+	const unit = document.getElementById('modalUnit').value.trim() || '次';
+	item = {id: 'ci_'+Date.now(), label: name, rate, unit, type: 'calc'};
+  } else {
+	const pts = parseFloat(document.getElementById('modalPts').value) || 1;
+	item = {id: 'ci_'+Date.now(), label: name, pts, type: type};
+  }
+
+  const items = STORE.get('apex_custom_'+secId) || [];
+  if(editingItem && editingItem.itemId){
+	const idx = items.findIndex(i=>i.id===editingItem.itemId);
+	if(idx>=0){
+	  if (type === 'calc') {
+		items[idx].label = name;
+		items[idx].rate = item.rate;
+		items[idx].unit = item.unit;
+		items[idx].type = 'calc';
+		delete items[idx].pts;
+	  } else {
+		items[idx].label = name;
+		items[idx].pts = item.pts;
+		items[idx].type = type;
+		delete items[idx].rate; delete items[idx].unit;
+	  }
+	}
+  } else {
+	items.push(item);
+  }
+  STORE.set('apex_custom_'+secId, items);
+  closeModal(); 
+  renderTodayCustomize(); 
+  renderToday();
+}
+
+function deleteItem(secId,itemId){
+  const items=(STORE.get('apex_custom_'+secId)||[]).filter(i=>i.id!==itemId);
+  STORE.set('apex_custom_'+secId,items);
+  renderTodayCustomize(); renderToday();
+}
+
+// ════════════════════════════════════
+//  RESET ALL DATA
+// ════════════════════════════════════
+function resetAllData() {
+  if (confirm('⚠️ 确定要重置所有数据吗？这将清空所有板块、历史记录、成就和自定义事项，且不可恢复。')) {
+	// 清除所有本应用相关的 localStorage 键
+	const keysToRemove = [];
+	for (let i = 0; i < localStorage.length; i++) {
+	  const key = localStorage.key(i);
+	  if (key.startsWith('apex_')) {
+		keysToRemove.push(key);
+	  }
+	}
+	keysToRemove.forEach(key => localStorage.removeItem(key));
+	// 重置为初始状态
+	saveSections([]);
+	// 刷新页面
+	location.reload();
+  }
+}
+
+// ════════════════════════════════════
+//  NAV
+// ════════════════════════════════════
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='history') renderHistory();
+  if(id==='streak') renderStreak();
+  if(id==='char') renderChar();
+  if(id==='today') {
+	renderToday();
+	renderTodayCustomize();
+  }
+}
+
+// ════════════════════════════════════
+//  CELEBRATION
+// ════════════════════════════════════
+function celebrate(pts){
+  const el=document.getElementById('celeb');
+  document.getElementById('celebP').textContent=pts;
+  document.getElementById('celebT').textContent='已记录';
+  el.classList.add('show');
+  clearTimeout(celebTimer);
+  celebTimer=setTimeout(()=>el.classList.remove('show'),1100);
+}
+
+function celebrateBig(msg){
+  const el=document.getElementById('celeb');
+  document.getElementById('celebP').textContent=msg;
+  document.getElementById('celebT').textContent='';
+  el.classList.add('show');
+  clearTimeout(celebTimer);
+  celebTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// ════════════════════════════════════
+//  INIT
+// ════════════════════════════════════
+(function init(){
+  if (!STORE.get('apex_sections')) {
+	saveSections([]);
+  }
+
+  renderToday();
+  renderChar();
+  renderStreak();
+
+  document.getElementById('streakThreshold').value = getStreakThreshold();
+
+  const hist = getHistory();
+  const keys = Object.keys(hist).sort();
+  if(keys.length){
+	const last = keys[keys.length-1];
+	if(last !== todayKey) document.getElementById('ydInput').value = hist[last].score;
+	else if(keys.length >= 2) document.getElementById('ydInput').value = hist[keys[keys.length-2]].score;
+	updateDiff();
+  }
+
+  // 同步主题切换开关状态
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) themeToggle.checked = document.body.classList.contains('light');
+})();
+</script>
+ </body>
+</html>
